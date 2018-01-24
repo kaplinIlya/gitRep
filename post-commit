@@ -1,0 +1,3 @@
+#!/bin/sh
+echo start
+curl http://localhost:8080/git/notifyCommit?url=https://github.com/kaplinIlya/gitRep.git
