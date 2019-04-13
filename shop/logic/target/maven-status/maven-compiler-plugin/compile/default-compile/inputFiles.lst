@@ -1,0 +1,17 @@
+C:\Users\VAIO\javaProjects\shop\logic\src\main\java\ru\example\domain\OrderLinesPK.java
+C:\Users\VAIO\javaProjects\shop\logic\src\main\java\ru\example\common\OrderLineOutbound.java
+C:\Users\VAIO\javaProjects\shop\logic\src\main\java\ru\example\domain\Orders.java
+C:\Users\VAIO\javaProjects\shop\logic\src\main\java\ru\example\ejb\OrdersManagerBean.java
+C:\Users\VAIO\javaProjects\shop\logic\src\main\java\ru\example\common\OrderOutbound.java
+C:\Users\VAIO\javaProjects\shop\logic\src\main\java\ru\example\domain\WarehouseLinesPK.java
+C:\Users\VAIO\javaProjects\shop\logic\src\main\java\ru\example\mq\SendMessage.java
+C:\Users\VAIO\javaProjects\shop\logic\src\main\java\ru\example\ejb\ItemsManagerBean.java
+C:\Users\VAIO\javaProjects\shop\logic\src\main\java\ru\example\domain\OrderLines.java
+C:\Users\VAIO\javaProjects\shop\logic\src\main\java\ru\example\common\OrderInbound.java
+C:\Users\VAIO\javaProjects\shop\logic\src\main\java\ru\example\domain\OrderStatus.java
+C:\Users\VAIO\javaProjects\shop\logic\src\main\java\ru\example\domain\WarehouseLines.java
+C:\Users\VAIO\javaProjects\shop\logic\src\main\java\ru\example\mq\SessionInstance.java
+C:\Users\VAIO\javaProjects\shop\logic\src\main\java\ru\example\domain\Items.java
+C:\Users\VAIO\javaProjects\shop\logic\src\main\java\ru\example\common\OrderLineIbound.java
+C:\Users\VAIO\javaProjects\shop\logic\src\main\java\ru\example\ejb\WarehousesManagerBean.java
+C:\Users\VAIO\javaProjects\shop\logic\src\main\java\ru\example\domain\Warehouses.java

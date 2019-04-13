@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:p="http://primefaces.org/ui">
+
+<h:head>
+    <title>Shop Integration</title>
+</h:head>
+<h:body>
+    <tr>
+        <td>
+            <h:form  id="item" title="Товары">
+                <h:panelGrid id="grid" columns="4" cellpadding="3">
+                    <p:outputLabel for="Id" value="Идентификатор" />
+                    <p:outputLabel for="descr" value="Наименование" />
+                    <p:outputLabel for="unit" value="ед. изм." />
+                    <p:outputLabel for="price" value="цена" />
+
+                    <p:inputText id="Id" value="#{itemBean.id}" validator="#{itemBean.validateId}" requiredMessage="Cannot be blank!"/>
+                    <p:inputText id="descr" value="#{itemBean.descr}" required="true" requiredMessage="Cannot be blank!"/>
+                    <p:inputText id="unit" value="#{itemBean.unit}" required="true" requiredMessage="Cannot be blank!"/>
+                    <p:inputText id="price" value="#{itemBean.price}" required="true" requiredMessage="Cannot be blank!"/>
+
+                    <p:message for="Id" display="text"/>
+                    <p:message for="descr" display="text"/>
+                    <p:message for="unit" display="text"/>
+                    <p:message for="price" display="text"/>
+                </h:panelGrid>
+                <tr>
+                    <td><p:commandButton value="Добавить товар"
+                                         update="itemsByfilter:items item:grid"
+                                         action="#{itemBean.addItem()}"/></td>
+                </tr>
+
+            </h:form>
+            <h:form id="itemsByfilter">
+                <tr>
+                    <td><p:inputText value="#{itemBean.itemFilter}"/></td>
+                    <td><p:commandButton value="Выбрать товары" update="itemsByfilter:items" action="#{itemBean.getItemsByFilter()}"/></td>
+                </tr>
+                <tr>
+                </tr>
+                <p:dataTable id="items" value="#{itemBean.itemsByFilter}" var="items" style="width: 50%">
+                    <f:facet name="header">
+                        Товары
+                    </f:facet>
+                    <p:column>
+                        <f:facet name="header">ИД</f:facet>
+                        <h:outputText value="#{items.id}"/>
+                    </p:column>
+                    <p:column>
+                        <f:facet name="header">Описание</f:facet>
+                        <h:outputText value="#{items.descr}"/>
+                    </p:column>
+                    <p:column>
+                        <f:facet name="header">Ед.изм.</f:facet>
+                        <h:outputText value="#{items.unit}"/>
+                    </p:column>
+                    <p:column>
+                        <f:facet name="header">Цена за ед.</f:facet>
+                        <h:outputText value="#{items.price}"/>
+                    </p:column>
+                    <p:column>
+                        <p:commandButton icon="ui-icon-plusthick"
+                                         title="В заказ"
+                                         actionListener="#{orderBean.addToOrder(items)}"
+                                         update="orders:lines"/>
+                    </p:column>
+                </p:dataTable>
+            </h:form>
+        </td>
+        <td>
+            <h:form id="orders">
+                <tr>
+                    <td><p:commandButton value="Новый заказ" action="#{orderBean.newOrder()}" update="orders:headers"/></td>
+                </tr>
+                <p:dataTable id="headers"
+                             value="#{orderBean.ordersByStatus}"
+                             paginator="false"
+                             scrollable="true"
+                             scrollHeight="200"
+                             var="order"
+                             rowKey="#{order.id}"
+                             selection="#{orderBean.selectedOrder}"
+                             selectionMode="single"
+                             style="width: 50%">
+                    <p:ajax event="rowSelect" update="orders:lines orders:save" listener="#{orderBean.getOrderLinesByID()}"/>
+                    <f:facet name="header">
+                        Заказы
+                    </f:facet>
+                    <p:column>
+                        <f:facet name="header">Номер</f:facet>
+                        <div style="text-align: center;">
+                            <h:outputText value="#{order.id}"/>
+                        </div>
+                    </p:column>
+                    <p:column>
+                        <f:facet name="header">Дата создания</f:facet>
+                        <div style="text-align: center;">
+                            <h:outputText value="#{order.createDate}"/>
+                        </div>
+                    </p:column>
+                    <p:column>
+                        <f:facet name="header">Сумма</f:facet>
+                        <div style="text-align: center;">
+                            <h:outputText value="#{order.amount}"/>
+                        </div>
+                    </p:column>
+                    <p:column>
+                        <f:facet name="header">Статус</f:facet>
+                        <div style="text-align: center;">
+                            <h:outputText value="#{order.status}"/>
+                        </div>
+                    </p:column>
+                    <p:column width="15%">
+                        <f:facet name="header">В работу</f:facet>
+                        <p:commandButton icon="ui-icon-check"
+                                         title="Отправить заказ"
+                                         update="orders"
+                                         actionListener="#{orderBean.sendOrder(order)}"/>
+                    </p:column>
+                    <p:column width="15%" style="float:center">
+                        <f:facet name="header">Удалить</f:facet>
+                        <p:commandButton icon="ui-icon-trash"
+                                         title="Удалить заказ"
+                                         update="orders"
+                                         actionListener="#{orderBean.delOrder(order.id)}"/>
+                    </p:column>
+                    </p:dataTable>
+                    <p:dataTable id="lines"
+                                 value="#{orderBean.orderLines}"
+                                 paginator="false"
+                                 rows="10"
+                                 scrollable="true"
+                                 var="line"
+                                 style="width: 60%">
+                        <f:facet name="header">
+                            Строки заказа
+                        </f:facet>
+                        <p:column>
+                            <f:facet name="header">Товар</f:facet>
+                            <div style="text-align: center;">
+                                <h:outputText value="#{line.orderLinesPK.items.descr}"/>
+                            </div>
+                        </p:column>
+                        <p:column>
+                            <f:facet name="header">Кол-во</f:facet>
+                            <p:inputText
+                                    id="count"
+                                    maxlength="5"
+                                    size="5"
+                                    value="#{line.count}">
+                            </p:inputText>
+                        </p:column>
+                        <p:column>
+                            <f:facet name="header">Ед.изм</f:facet>
+                            <div style="text-align: center;">
+                                <h:outputText value="#{line.unit}"/>
+                            </div>
+                        </p:column>
+                        <p:column>
+                            <f:facet name="header">Цена за ед.</f:facet>
+                            <div style="text-align: center;">
+                                <h:outputText value="#{line.orderLinesPK.items.price}"/>
+                            </div>
+                        </p:column>
+                        <p:column>
+                            <f:facet name="header">Стоимость</f:facet>
+                            <div style="text-align: center;">
+                                <h:outputText value="#{line.cost}"/>
+                            </div>
+                        </p:column>
+                        <p:column width="15%" style="float:center">
+                            <f:facet name="header">Удалить</f:facet>
+                            <p:commandButton icon="ui-icon-trash"
+                                             title="Удалить"
+                                             actionListener="#{orderBean.removeFromOrder(line)}"
+                                             update="orders:lines"/>
+                        </p:column>
+                    </p:dataTable>
+                    <p:commandButton id="save"
+                                     value="Сохранить"
+                                     title="Сохранить"
+                                     rendered="true"
+                                     actionListener="#{orderBean.saveLines()}"
+                                     update="orders"/>
+                </h:form>
+        </td>
+    </tr>
+</h:body>
+</html>

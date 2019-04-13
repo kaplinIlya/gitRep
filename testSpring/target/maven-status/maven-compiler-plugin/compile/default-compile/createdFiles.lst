@@ -1,0 +1,14 @@
+com\controller\CarController.class
+com\customBean\TestContextBean.class
+com\service\CarService.class
+com\service\CarServiceImpl.class
+com\DAO\CarDAO.class
+com\DAO\CarDAOImpl.class
+com\service\CarServiceREST.class
+com\customBean\TestBean.class
+com\model\enums\Colors.class
+com\model\Car.class
+com\controller\CarControllerImpl.class
+com\service\CarServiceRESTImpl.class
+com\controller\CarControllerRest.class
+com\controller\MainController.class

@@ -1,0 +1,17 @@
+ru\example\common\OrderInbound.class
+ru\example\common\OrderLineOutbound.class
+ru\example\domain\OrderLines.class
+ru\example\common\OrderOutbound.class
+ru\example\domain\WarehouseLinesPK.class
+ru\example\mq\SessionInstance.class
+ru\example\ejb\WarehousesManagerBean.class
+ru\example\common\OrderLineIbound.class
+ru\example\domain\Orders.class
+ru\example\ejb\ItemsManagerBean.class
+ru\example\domain\Warehouses.class
+ru\example\domain\OrderLinesPK.class
+ru\example\domain\WarehouseLines.class
+ru\example\mq\SendMessage.class
+ru\example\domain\OrderStatus.class
+ru\example\ejb\OrdersManagerBean.class
+ru\example\domain\Items.class
