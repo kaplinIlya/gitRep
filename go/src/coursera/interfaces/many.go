@@ -18,6 +18,11 @@ func (w *Wallet) Pay(amount int) error {
 	return nil
 }
 
+func (w *Wallet) Put(amount int) error {
+	w.Cash += amount
+	return nil
+}
+
 // --------------
 
 type Card struct {
@@ -36,6 +41,11 @@ func (c *Card) Pay(amount int) error {
 	return nil
 }
 
+func (c *Card) Put(amount int) error {
+	c.Balance += amount
+	return nil
+}
+
 // --------------
 
 type ApplePay struct {
@@ -51,10 +61,16 @@ func (a *ApplePay) Pay(amount int) error {
 	return nil
 }
 
+func (a *ApplePay) Put(amount int) error {
+	a.Money += amount
+	return nil
+}
+
 // --------------
 
 type Payer interface {
 	Pay(int) error
+	Put(int) error
 }
 
 // --------------
@@ -66,6 +82,12 @@ func Buy(p Payer) {
 		return
 	}
 	fmt.Printf("Спасибо за покупку через %T\n\n", p)
+}
+
+func Put(p Payer) {
+	p.Put(50)
+	fmt.Printf("Спасибо за пополнение через %T\n\n", p)
+	return
 }
 
 // --------------
@@ -80,5 +102,7 @@ func main() {
 	Buy(myMoney)
 
 	myMoney = &ApplePay{Money: 9}
+	Buy(myMoney)
+	Put(myMoney)
 	Buy(myMoney)
 }
