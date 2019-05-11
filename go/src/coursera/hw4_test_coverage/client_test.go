@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"encoding/xml"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
@@ -15,7 +16,7 @@ import (
 	"time"
 )
 
-type user struct {
+type RawUser struct {
 	Id        int    `xml:"id"`
 	FirstName string `xml:"first_name"`
 	LastName  string `xml:"last_name"`
@@ -24,8 +25,9 @@ type user struct {
 	Gender    string `xml:"gender"`
 }
 
-type users struct {
-	all []user `xml:"row"`
+type RawUsers struct {
+	XMLName xml.Name  `xml:"root"`
+	List    []RawUser `xml:"row"`
 }
 
 const (
@@ -57,83 +59,99 @@ func TestFindUsers(t *testing.T) {
 	}
 	cases := []TestCase{
 
-		// // limit<0
-		// TestCase{
+		// limit<0
+		TestCase{
 
-		// 	Client: SearchClient{URL: ts.URL, AccessToken: accessToken},
-		// 	Rq:     SearchRequest{Limit: -1},
-		// 	Rs:     getEmptyResponse(),
-		// 	Err:    true,
-		// },
+			Client: SearchClient{URL: ts.URL, AccessToken: accessToken},
+			Rq:     SearchRequest{Limit: -1},
+			Rs:     getEmptyResponse(),
+			Err:    true,
+		},
 
-		// // offset<0
-		// TestCase{
-		// 	Client: SearchClient{URL: ts.URL, AccessToken: accessToken},
-		// 	Rq:     SearchRequest{Limit: 50, Offset: -1},
-		// 	Rs:     getEmptyResponse(),
-		// 	Err:    true,
-		// },
+		// offset<0
+		TestCase{
+			Client: SearchClient{URL: ts.URL, AccessToken: accessToken},
+			Rq:     SearchRequest{Limit: 50, Offset: -1},
+			Rs:     getEmptyResponse(),
+			Err:    true,
+		},
 
-		// // wrong oderBy
-		// TestCase{
-		// 	Client: SearchClient{URL: ts.URL, AccessToken: accessToken},
-		// 	Rq:     SearchRequest{Limit: 1, OrderBy: 2},
-		// 	Rs:     getEmptyResponse(),
-		// 	Err:    true,
-		// },
+		// wrong oderBy
+		TestCase{
+			Client: SearchClient{URL: ts.URL, AccessToken: accessToken},
+			Rq:     SearchRequest{Limit: 1, OrderBy: 2},
+			Rs:     getEmptyResponse(),
+			Err:    true,
+		},
 
-		// // wrong token
-		// TestCase{
-		// 	Client: SearchClient{URL: ts.URL, AccessToken: "Unknown"},
-		// 	Rq:     SearchRequest{Limit: 1},
-		// 	Rs:     getEmptyResponse(),
-		// 	Err:    true,
-		// },
-		// // unknown error
-		// TestCase{
-		// 	Client: SearchClient{URL: ts.URL + "wrong", AccessToken: accessToken},
-		// 	Rq:     SearchRequest{Limit: 1},
-		// 	Rs:     getEmptyResponse(),
-		// 	Err:    true,
-		// },
+		// wrong token
+		TestCase{
+			Client: SearchClient{URL: ts.URL, AccessToken: "Unknown"},
+			Rq:     SearchRequest{Limit: 1},
+			Rs:     getEmptyResponse(),
+			Err:    true,
+		},
+		// unknown error
+		TestCase{
+			Client: SearchClient{URL: ts.URL + "wrong", AccessToken: accessToken},
+			Rq:     SearchRequest{Limit: 1},
+			Rs:     getEmptyResponse(),
+			Err:    true,
+		},
 
-		// // timeout
-		// TestCase{
-		// 	Client: SearchClient{URL: ts.URL, AccessToken: "timeout"},
-		// 	Rq:     SearchRequest{},
-		// 	Rs:     getEmptyResponse(),
-		// 	Err:    true,
-		// },
+		// timeout
+		TestCase{
+			Client: SearchClient{URL: ts.URL, AccessToken: "timeout"},
+			Rq:     SearchRequest{},
+			Rs:     getEmptyResponse(),
+			Err:    true,
+		},
 
-		// // filename
-		// TestCase{
-		// 	Client: SearchClient{URL: ts.URL, AccessToken: "StatusInternalServerError"},
-		// 	Rq:     SearchRequest{},
-		// 	Rs:     getEmptyResponse(),
-		// 	Err:    true,
-		// },
+		// filename
+		TestCase{
+			Client: SearchClient{URL: ts.URL, AccessToken: "StatusInternalServerError"},
+			Rq:     SearchRequest{},
+			Rs:     getEmptyResponse(),
+			Err:    true,
+		},
 
-		// //ErrorBadOrderField
-		// TestCase{
-		// 	Client: SearchClient{URL: ts.URL, AccessToken: accessToken},
-		// 	Rq:     SearchRequest{OrderField: "bad"},
-		// 	Rs:     getEmptyResponse(),
-		// 	Err:    true,
-		// },
+		//ErrorBadOrderField
+		TestCase{
+			Client: SearchClient{URL: ts.URL, AccessToken: accessToken},
+			Rq:     SearchRequest{OrderField: "bad"},
+			Rs:     getEmptyResponse(),
+			Err:    true,
+		},
 
-		// //ErrorUnknownOrderField
-		// TestCase{
-		// 	Client: SearchClient{URL: ts.URL, AccessToken: accessToken},
-		// 	Rq:     SearchRequest{OrderField: "unknown"},
-		// 	Rs:     getEmptyResponse(),
-		// 	Err:    true,
-		// },
+		//ErrorUnknownOrderField
+		TestCase{
+			Client: SearchClient{URL: ts.URL, AccessToken: accessToken},
+			Rq:     SearchRequest{OrderField: "unknown"},
+			Rs:     getEmptyResponse(),
+			Err:    true,
+		},
 
 		//ok
 		TestCase{
 			Client: SearchClient{URL: ts.URL, AccessToken: accessToken},
-			Rq:     SearchRequest{Query: "Boyd", Offset: 0, Limit: 1},
+			Rq:     SearchRequest{Query: "Boyd", Offset: 0, Limit: 1, OrderField: "Age"},
 			Rs:     &expectedOk,
+			Err:    false,
+		},
+
+		//unpack
+		TestCase{
+			Client: SearchClient{URL: ts.URL, AccessToken: accessToken},
+			Rq:     SearchRequest{Query: "Boyd", Offset: 0, Limit: 0},
+			Rs:     getEmptyResponse(),
+			Err:    false,
+		},
+
+		//wrong json
+		TestCase{
+			Client: SearchClient{URL: ts.URL, AccessToken: accessToken},
+			Rq:     SearchRequest{Offset: 0, Limit: 1},
+			Rs:     getEmptyResponse(),
 			Err:    false,
 		},
 	}
@@ -144,8 +162,8 @@ func TestFindUsers(t *testing.T) {
 			t.Errorf("case "+strconv.Itoa(i)+" error got=%v want=%v", err, testCase.Err)
 		}
 
-		if resp != nil && !reflect.DeepEqual(resp, testCase.Rs) {
-			t.Errorf("case " + strconv.Itoa(i))
+		if testCase.Rs != nil && !reflect.DeepEqual(resp, testCase.Rs) {
+			t.Errorf("case "+strconv.Itoa(i)+" error got=%v want=%v", resp, testCase.Rs)
 		}
 	}
 }
@@ -203,15 +221,15 @@ func SearchServer(w http.ResponseWriter, r *http.Request) {
 	xmlFile, err1 := os.Open(filename)
 	defer xmlFile.Close()
 	byteFile, err2 := ioutil.ReadAll(xmlFile)
-	var users users
-	err3 := xml.Unmarshal(byteFile, &users)
+	var rawUsers RawUsers
+	err3 := xml.Unmarshal([]byte(byteFile), &rawUsers)
 	if err1 != nil || err2 != nil || err3 != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-
+	fmt.Println("all:  " + strconv.Itoa(len(rawUsers.List)))
 	var findUsers []User
-	for _, row := range users.all {
+	for _, row := range rawUsers.List {
 		if strings.Contains(row.FirstName+row.LastName, r.FormValue("query")) ||
 			strings.Contains(row.About, r.FormValue("query")) {
 			if offset != 0 {
@@ -221,59 +239,59 @@ func SearchServer(w http.ResponseWriter, r *http.Request) {
 			findUsers = append(findUsers, User{Id: row.Id, Name: row.FirstName + " " + row.LastName,
 				Age: row.Age, About: row.About, Gender: row.Gender})
 
-			if len(findUsers) == limit {
+			if len(findUsers) == limit-1 {
 				break
 			}
 		}
-
 	}
+
+	Sort(findUsers, orderField, orderBy)
+
+	fmt.Println("find:   " + strconv.Itoa(len(findUsers)))
 	result, _ := json.Marshal(findUsers)
 	w.Write(result)
 	return
+}
 
-	switch r.FormValue("orderField") {
+func Sort(users []User, orderField string, orderBy int) {
+	switch orderField {
 	case "Id":
-		sort.Slice(findUsers[:], func(i, j int) bool {
+		sort.Slice(users[:], func(i, j int) bool {
 			switch orderBy {
 			case 1:
-				return findUsers[i].Id < findUsers[j].Id
+				return users[i].Id < users[j].Id
 			case -1:
-				return findUsers[i].Id > findUsers[j].Id
+				return users[i].Id > users[j].Id
 			default:
 				return true
 			}
 		})
 
 	case "Name":
-		sort.Slice(findUsers[:], func(i, j int) bool {
+		sort.Slice(users[:], func(i, j int) bool {
 			switch orderBy {
 			case 1:
-				return findUsers[i].Name < findUsers[j].Name
+				return users[i].Name < users[j].Name
 			case -1:
-				return findUsers[i].Name > findUsers[j].Name
+				return users[i].Name > users[j].Name
 			default:
 				return true
 			}
 		})
 
 	case "Age":
-		sort.Slice(findUsers[:], func(i, j int) bool {
+		sort.Slice(users[:], func(i, j int) bool {
 			switch orderBy {
 			case 1:
-				return findUsers[i].Age < findUsers[j].Age
+				return users[i].Age < users[j].Age
 			case -1:
-				return findUsers[i].Age > findUsers[j].Age
+				return users[i].Age > users[j].Age
 			default:
 				return true
 			}
 		})
 
 	default:
-		w.WriteHeader(http.StatusOK)
 		return
 	}
 }
-
-// func findUsers(file, query, orderField string, limit, offset, order_by int) ([]User, error){
-
-// }
