@@ -1,9 +1,11 @@
 package main
 
+//go test -cover
+//go test -coverprofile=cover.out && go tool cover -html=cover.out -o cover.html
+
 import (
 	"encoding/json"
 	"encoding/xml"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
@@ -149,7 +151,7 @@ func TestFindUsers(t *testing.T) {
 
 		//wrong json
 		TestCase{
-			Client: SearchClient{URL: ts.URL, AccessToken: accessToken},
+			Client: SearchClient{URL: ts.URL, AccessToken: "wrongJson"},
 			Rq:     SearchRequest{Offset: 0, Limit: 1},
 			Rs:     getEmptyResponse(),
 			Err:    false,
@@ -180,6 +182,12 @@ func SearchServer(w http.ResponseWriter, r *http.Request) {
 	}
 	if r.Header.Get("AccessToken") == "StatusInternalServerError" {
 		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	if r.Header.Get("AccessToken") == "wrongJson" {
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("____"))
 		return
 	}
 
@@ -227,7 +235,7 @@ func SearchServer(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	fmt.Println("all:  " + strconv.Itoa(len(rawUsers.List)))
+	//fmt.Println("all:  " + strconv.Itoa(len(rawUsers.List)))
 	var findUsers []User
 	for _, row := range rawUsers.List {
 		if strings.Contains(row.FirstName+row.LastName, r.FormValue("query")) ||
@@ -247,7 +255,7 @@ func SearchServer(w http.ResponseWriter, r *http.Request) {
 
 	Sort(findUsers, orderField, orderBy)
 
-	fmt.Println("find:   " + strconv.Itoa(len(findUsers)))
+	//fmt.Println("find:   " + strconv.Itoa(len(findUsers)))
 	result, _ := json.Marshal(findUsers)
 	w.Write(result)
 	return
