@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import ru.test.app.entity.Customer;
+import ru.test.app.request.CarRq;
 import ru.test.app.service.CustomerService;
 
 import java.util.List;
@@ -32,5 +33,11 @@ public class restEndpoint {
     @ResponseBody
     public List<Customer> getAllCustomers(){
         return customerService.getCustomers() ;
+    }
+
+    //    http://localhost:8088/bootExample/printCar?model=bmw&power=150&color=black
+    @GetMapping("/printCar")
+    public String printCar(CarRq car){
+        return car.toString();
     }
 }
