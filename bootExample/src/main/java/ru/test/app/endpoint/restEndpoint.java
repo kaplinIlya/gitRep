@@ -1,6 +1,7 @@
 package ru.test.app.endpoint;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -15,12 +16,15 @@ import java.util.List;
 @RestController
 public class restEndpoint {
 
+    @Value("${spring.profiles.active}")
+    private String profile;
+
     @Autowired
     CustomerService customerService;
     //    http://localhost:8088/bootExample/sayHello
     @GetMapping("/sayHello")
     public String sayHello(){
-        return ("Hello from Boot Example");
+        return ("Hello from Boot Example. Profile: " + profile);
     }
 
     //    http://localhost:8088/bootExample/getCustomers
