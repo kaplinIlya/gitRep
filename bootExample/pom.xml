@@ -16,7 +16,7 @@
         <version>2.0.4.RELEASE</version>
     </parent>
 
-    <packaging>war</packaging>
+<!--    <packaging>war</packaging>-->
 
     <properties>
         <java-version>1.8</java-version>
